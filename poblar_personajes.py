@@ -35,7 +35,7 @@ def poblar():
 
     print("🚀 Iniciando población de personajes...")
     for p in personajes_data:
-        personaje, created = Personaje.objects.get_or_create(
+        personaje, created = Personaje.objects.update_or_create(
             nombre=p['nombre'],
             defaults={
                 'x': p['x'],
@@ -47,7 +47,7 @@ def poblar():
         if created:
             print(f"✅ Personaje creado: {personaje.nombre}")
         else:
-            print(f"ℹ️ El personaje {personaje.nombre} ya existía.")
+            print(f"ℹ️ El personaje {personaje.nombre} fue actualizado con éxito.")
     print("✨ ¡Población finalizada con éxito!")
 
 if __name__ == '__main__':

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selección de Personajes</title>
-    <!-- CSS (Punto 6): Estilos para que las tarjetas se vean ordenadas y modernas -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -42,6 +41,14 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.2);
         }
+        .card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #475569;
+        }
         .card h3 {
             margin: 10px 0;
             color: #e2e8f0;
@@ -78,34 +85,55 @@
 
     <h1>Elige tu Personaje</h1>
 
-    <!-- HTML (Punto 4): Contenedor donde JavaScript inyectará las tarjetas dinámicamente -->
-    <div class="container" id="contenedor-personajes">
-        <!-- Las tarjetas se cargarán aquí solas -->
-    </div>
-
+    <div class="container" id="contenedor-personajes"></div>
     <div id="mensaje-estado"></div>
 
-    <!-- JavaScript (Punto 5): La lógica que se comunica con nuestros Endpoints -->
     <script>
-        // 1. Al cargar la página, consumimos el Endpoint GET para traer los personajes
         async function cargarPersonajes() {
             try {
                 let respuesta = await fetch('/api/personajes/');
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron cargar los personajes.');
+                }
                 let datos = await respuesta.json();
                 
                 let contenedor = document.getElementById('contenedor-personajes');
-                contenedor.innerHTML = ''; // Limpiar por si acaso
+                contenedor.innerHTML = '';
 
-                // Recorremos cada personaje recibido de la Base de Datos
+                // Construcción segura del DOM utilizando createElement y textContent
                 datos.personajes.forEach(p => {
                     let card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `
-                        <h3>${p.nombre}</h3>
-                        <p>Velocidad: ${p.velocidad}</p>
-                        <p>Pos X: ${p.x} | Pos Y: ${p.y}</p>
-                        <button class="btn-seleccionar" onclick="seleccionar(${p.id}, '${p.nombre}')">Seleccionar</button>
-                    `;
+
+                    // Imagen
+                    let img = document.createElement('img');
+                    img.src = p.imagen.startsWith('/') ? p.imagen : '/' + p.imagen;
+                    img.alt = p.nombre;
+                    img.onerror = () => { img.style.display = 'none'; };
+                    card.appendChild(img);
+
+                    // Nombre
+                    let h3 = document.createElement('h3');
+                    h3.textContent = p.nombre;
+                    card.appendChild(h3);
+
+                    // Velocidad
+                    let pVel = document.createElement('p');
+                    pVel.textContent = `Velocidad: ${p.velocidad}`;
+                    card.appendChild(pVel);
+
+                    // Coordenadas
+                    let pPos = document.createElement('p');
+                    pPos.textContent = `Pos X: ${p.x} | Pos Y: ${p.y}`;
+                    card.appendChild(pPos);
+
+                    // Botón con addEventListener seguro
+                    let btn = document.createElement('button');
+                    btn.className = 'btn-seleccionar';
+                    btn.textContent = 'Seleccionar';
+                    btn.addEventListener('click', () => seleccionar(p.id, p.nombre));
+                    card.appendChild(btn);
+
                     contenedor.appendChild(card);
                 });
             } catch (error) {
@@ -113,14 +141,11 @@
             }
         }
 
-        // 2. Al hacer clic en un botón, consumimos el Endpoint POST para enviar la elección
         async function seleccionar(id, nombre) {
             try {
                 let respuesta = await fetch('/api/seleccionar/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id, nombre: nombre })
                 });
                 
@@ -139,7 +164,6 @@
             }
         }
 
-        // Ejecutar la función al cargar la ventana
         window.onload = cargarPersonajes;
     </script>
 </body>
