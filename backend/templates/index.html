@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Personajes</title>
+    <!-- CSS (Punto 6): Estilos para que las tarjetas se vean ordenadas y modernas -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            color: #38bdf8;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #334155;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.2);
+        }
+        .card h3 {
+            margin: 10px 0;
+            color: #e2e8f0;
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin: 5px 0;
+        }
+        .btn-seleccionar {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+        .btn-seleccionar:hover {
+            background-color: #0ea5e9;
+        }
+        #mensaje-estado {
+            margin-top: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Elige tu Personaje</h1>
+
+    <!-- HTML (Punto 4): Contenedor donde JavaScript inyectará las tarjetas dinámicamente -->
+    <div class="container" id="contenedor-personajes">
+        <!-- Las tarjetas se cargarán aquí solas -->
+    </div>
+
+    <div id="mensaje-estado"></div>
+
+    <!-- JavaScript (Punto 5): La lógica que se comunica con nuestros Endpoints -->
+    <script>
+        // 1. Al cargar la página, consumimos el Endpoint GET para traer los personajes
+        async function cargarPersonajes() {
+            try {
+                let respuesta = await fetch('/api/personajes/');
+                let datos = await respuesta.json();
+                
+                let contenedor = document.getElementById('contenedor-personajes');
+                contenedor.innerHTML = ''; // Limpiar por si acaso
+
+                // Recorremos cada personaje recibido de la Base de Datos
+                datos.personajes.forEach(p => {
+                    let card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${p.nombre}</h3>
+                        <p>Velocidad: ${p.velocidad}</p>
+                        <p>Pos X: ${p.x} | Pos Y: ${p.y}</p>
+                        <button class="btn-seleccionar" onclick="seleccionar(${p.id}, '${p.nombre}')">Seleccionar</button>
+                    `;
+                    contenedor.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error cargando personajes:", error);
+            }
+        }
+
+        // 2. Al hacer clic en un botón, consumimos el Endpoint POST para enviar la elección
+        async function seleccionar(id, nombre) {
+            try {
+                let respuesta = await fetch('/api/seleccionar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id, nombre: nombre })
+                });
+                
+                let resultado = await respuesta.json();
+                let estadoDiv = document.getElementById('mensaje-estado');
+                
+                if (respuesta.ok) {
+                    estadoDiv.style.color = '#4ade80';
+                    estadoDiv.innerText = `✅ ¡Éxito! ${resultado.mensaje}`;
+                } else {
+                    estadoDiv.style.color = '#f87171';
+                    estadoDiv.innerText = `❌ Error: ${resultado.mensaje}`;
+                }
+            } catch (error) {
+                console.error("Error en la petición POST:", error);
+            }
+        }
+
+        // Ejecutar la función al cargar la ventana
+        window.onload = cargarPersonajes;
+    </script>
+</body>
+</html>
