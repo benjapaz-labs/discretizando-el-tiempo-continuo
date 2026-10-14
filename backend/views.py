@@ -17,23 +17,34 @@ def listar_personajes(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 # Endpoint POST: Recibe la selección del personaje (Punto 3)
+
 @csrf_exempt
 def seleccionar_personaje(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             personaje_id = data.get('id')
-            personaje_nombre = data.get('nombre')
             
-            # Aquí puedes procesar la lógica de selección o guardarla
-            print(f"¡Personaje seleccionado con éxito! ID: {personaje_id}, Nombre: {personaje_nombre}")
+            # Validar que el personaje exista en la base de datos
+            personaje = Personaje.objects.get(id=personaje_id)
+            
+            print(f"¡Personaje seleccionado con éxito! ID: {personaje.id}, Nombre: {personaje.nombre}")
             
             return JsonResponse({
                 'status': 'success',
-                'mensaje': f'Personaje {personaje_nombre} seleccionado correctamente.'
-            })
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=400)
+                'mensaje': f'¡Éxito! Personaje {personaje.nombre} seleccionado correctamente.'
+            }, status=200)
             
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
-# Create your views here.
+        except Personaje.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'mensaje': 'El personaje seleccionado no existe en la base de datos.'
+            }, status=404)
+            
+        except (json.JSONDecodeError, TypeError):
+            return JsonResponse({
+                'status': 'error',
+                'mensaje': 'Formato JSON inválido.'
+            }, status=400)
+            
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'}, status=405)
