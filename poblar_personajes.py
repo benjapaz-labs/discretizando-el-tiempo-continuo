@@ -8,28 +8,27 @@ django.setup()
 from backend.models import Personaje
 
 def poblar():
-    # Lista escalable de 3 a N personajes con sus respectivos atributos e imagen por defecto
     personajes_data = [
         {
-            "nombre": "Devil",
+            "nombre": "Sram",
             "x": 50,
             "y": 50,
             "velocidad": 30,
-            "imagen": "statics/2523a30408b613d375000bf2c7774198.jpg"
+            "imagen": "sram.jpg"
         },
         {
-            "nombre": "Auto",
+            "nombre": "Feca",
             "x": 100,
             "y": 100,
             "velocidad": 40,
-            "imagen": "statics/2523a30408b613d375000bf2c7774198.jpg"
+            "imagen": "feca.jpg"
         },
         {
-            "nombre": "Dino",
+            "nombre": "Osa",
             "x": 150,
             "y": 150,
             "velocidad": 35,
-            "imagen": "statics/2523a30408b613d375000bf2c7774198.jpg"
+            "imagen": "osa.jpg"
         },
     ]
 

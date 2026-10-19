@@ -42,8 +42,8 @@
             box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.2);
         }
         .card img {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 10px;
@@ -83,7 +83,7 @@
 </head>
 <body>
 
-    <h1>Elige tu Personaje</h1>
+    <h1>Selección de Personajes</h1>
 
     <div class="container" id="contenedor-personajes"></div>
     <div id="mensaje-estado"></div>
@@ -100,7 +100,6 @@
                 let contenedor = document.getElementById('contenedor-personajes');
                 contenedor.innerHTML = '';
 
-                // Construcción segura del DOM utilizando createElement y textContent
                 datos.personajes.forEach(p => {
                     let card = document.createElement('div');
                     card.className = 'card';
@@ -109,7 +108,6 @@
                     let img = document.createElement('img');
                     img.src = p.imagen.startsWith('/') ? p.imagen : '/' + p.imagen;
                     img.alt = p.nombre;
-                    img.onerror = () => { img.style.display = 'none'; };
                     card.appendChild(img);
 
                     // Nombre
@@ -122,16 +120,11 @@
                     pVel.textContent = `Velocidad: ${p.velocidad}`;
                     card.appendChild(pVel);
 
-                    // Coordenadas
-                    let pPos = document.createElement('p');
-                    pPos.textContent = `Pos X: ${p.x} | Pos Y: ${p.y}`;
-                    card.appendChild(pPos);
-
-                    // Botón con addEventListener seguro
+                    // Botón Seleccionar (POST)
                     let btn = document.createElement('button');
                     btn.className = 'btn-seleccionar';
                     btn.textContent = 'Seleccionar';
-                    btn.addEventListener('click', () => seleccionar(p.id, p.nombre));
+                    btn.addEventListener('click', () => seleccionar(p.id));
                     card.appendChild(btn);
 
                     contenedor.appendChild(card);
@@ -141,12 +134,12 @@
             }
         }
 
-        async function seleccionar(id, nombre) {
+        async function seleccionar(id) {
             try {
                 let respuesta = await fetch('/api/seleccionar/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id, nombre: nombre })
+                    body: JSON.stringify({ id: id })
                 });
                 
                 let resultado = await respuesta.json();
@@ -154,7 +147,7 @@
                 
                 if (respuesta.ok) {
                     estadoDiv.style.color = '#4ade80';
-                    estadoDiv.innerText = `✅ ¡Éxito! ${resultado.mensaje}`;
+                    estadoDiv.innerText = `✅ ${resultado.mensaje}`;
                 } else {
                     estadoDiv.style.color = '#f87171';
                     estadoDiv.innerText = `❌ Error: ${resultado.mensaje}`;
